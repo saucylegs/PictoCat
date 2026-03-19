@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\PictoCat;
 use MediaWiki\Category\Category;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleArrayFromResult;
 use MediaWiki\Title\TitleFactory;
@@ -38,7 +37,7 @@ class PictoCategory {
 	/**
 	 * The IDs used for the double underscore magic words that override a category's display style.
 	 */
-	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle', 'usegallerystyle' ];
+	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle' ];
 
 	/**
 	 * Instantiates a PictoCategory object.
@@ -69,19 +68,16 @@ class PictoCategory {
 		$pageProps = $this->getPageProps( self::MAGIC_WORD_IDS );
 		switch ( array_key_first( $pageProps ) ) {
 			case 'usebulletstyle':
-				$this->setStyle( $parserOutput, PictoCatStyle::Bullet );
-				return;
-			case 'usegallerystyle':
-				$this->setStyle( $parserOutput, PictoCatStyle::Gallery );
+				$this->style = PictoCatStyle::Bullet;
 				return;
 			case 'nopictocat':
-				$this->setStyle( $parserOutput, PictoCatStyle::None );
+				$this->style = PictoCatStyle::None;
 				return;
 			case 'pictocat':
 				// Force default style
-				$this->setStyle( $parserOutput, PictoCatStyle::tryFrom(
+				$this->style = PictoCatStyle::tryFrom(
 					strtolower( $mainConfig->get( 'PictoCatDefaultStyle' ) )
-				) ?? PictoCatStyle::Bullet );
+				) ?? PictoCatStyle::Bullet;
 				return;
 			default:
 				break;
@@ -94,7 +90,7 @@ class PictoCategory {
 
             // Avoiding dividing by zero for empty categories
             if ( count( $members ) === 0 ) {
-                $this->setStyle( $parserOutput, PictoCatStyle::None );
+                $this->style = PictoCatStyle::None;
                 return;
             }
 
@@ -104,16 +100,16 @@ class PictoCategory {
 
 			$actualPercentage = count( $membersWithPageImages ) / (float)count( $members ) * 100.0;
 			if ( ceil( $actualPercentage ) < $activationPercentage ) {
-				$this->setStyle( $parserOutput, PictoCatStyle::None );
+				$this->style = PictoCatStyle::None;
 				return;
 			}
 		}
 
 		// Finally, check the config for the default style
 		// "Bullet" is the default style if the config value is unrecognized
-        $this->setStyle( $parserOutput, PictoCatStyle::tryFrom(
-            strtolower( $mainConfig->get( 'PictoCatDefaultStyle' ) )
-        ) ?? PictoCatStyle::Bullet );
+		$this->style = PictoCatStyle::tryFrom(
+			strtolower( $mainConfig->get( 'PictoCatDefaultStyle' ) )
+		) ?? PictoCatStyle::Bullet;
 	}
 
 	/**
@@ -179,16 +175,4 @@ class PictoCategory {
 			$queryBuilder->caller( __METHOD__ )->fetchResultSet()
 		);
 	}
-
-    /**
-     * Sets this object's style attribute and also sets the corresponding page property.
-     * @param ParserOutput $parserOutput The ParserOutput object for the category page.
-     * @param PictoCatStyle $style The new style value.
-     * @return void
-     */
-    private function setStyle( ParserOutput $parserOutput, PictoCatStyle $style ): void {
-        $this->style = $style;
-		wfDebug( "[PictoCat] Set style as $style->value." );
-        $parserOutput->setPageProperty( 'pictocat_style', $style->value );
-    }
 }

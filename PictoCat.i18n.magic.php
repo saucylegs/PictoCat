@@ -13,5 +13,4 @@ $magicWords['en'] = [
     'nopictocat' => [ 0, '__NOPICTOCAT__' ],
 	'pictocat' => [ 0, '__PICTOCAT__' ],
     'usebulletstyle' => [ 0, '__USEBULLETSTYLE__' ],
-    'usegallerystyle' => [ 0, '__USEGALLERYSTYLE__' ],
 ];

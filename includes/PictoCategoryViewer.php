@@ -2,7 +2,6 @@
 
 namespace MediaWiki\Extension\PictoCat;
 
-use ImageGalleryBase;
 use InvalidArgumentException;
 use MediaWiki\Cache\LinkCache;
 use MediaWiki\Category\Category;
@@ -36,11 +35,6 @@ class PictoCategoryViewer extends CategoryViewer {
 	 * @var PictoCategory The PictoCategory object for this category. Useful for getting the style.
 	 */
 	public PictoCategory $pictocat;
-
-	/**
-	 * @var ImageGalleryBase The gallery used if and only if the PictoCat style is Gallery.
-	 */
-	public ImageGalleryBase $articleGallery;
 
 	/**
 	 * @var PageImageCache A cache of the page images for the category members to render.
@@ -87,8 +81,6 @@ class PictoCategoryViewer extends CategoryViewer {
 			->getLanguageConverterFactory()->getLanguageConverter();
 		$this->codex = new Codex();
 		$this->urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
-		// TODO: articleGallery instantiation should maybe be moved to clearCategoryState()
-		$this->articleGallery = ImageGalleryBase::factory( false, $context );
 		$this->pageImageCache = new PageImageCache();
         $this->pictocat = new PictoCategory( $context );
 		$moduleStyles = [ 'ext.pictoCat' ];
@@ -108,59 +100,42 @@ class PictoCategoryViewer extends CategoryViewer {
 		int $pageLength,
 		bool $isRedirect = false
 	): void {
-		switch ( $this->pictocat->getStyle() ) {
-			case PictoCatStyle::Bullet:
-				$title = MediaWikiServices::getInstance()->getTitleFactory()->newFromPageReference( $page );
-				$image = $this->repoGroup->findFile( $this->pageImageCache->pop( $title->getId() ) );
-
-				// Render image bullet
-				$thumbnail = $this->codex->thumbnail();
-				if ( $image ) {
-					$thumbUrl = $image->createThumb( self::BULLET_RENDER_SIZE );
-					// createThumb can output a relative URL, which Codex doesn't like.
-					$thumbUrl = $this->urlUtils->expand( $thumbUrl );
-					$thumbnail->setBackgroundImage( $thumbUrl );
-				}
-				// Otherwise, Codex should automatically use a placeholder icon
-
-				$html = $thumbnail->build()->getHtml();
-
-				// Render page name
-				$html .= Html::element(
-					'span',
-					[ 'class' => $isRedirect ? 'member-name redirect-in-category' : 'member-name' ],
-					$title->getFullText()
-				);
-
-				// Make link
-				$html = new HtmlArmor( $html );
-				$link = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink( $page, $html, [
-					'class' => 'pictocat-bullet'
-				] );
-
-				$this->articles[] = $link;
-				$this->articles_start_char[] =
-					$this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
-				break;
-
-			case PictoCatStyle::Gallery:
-				$title = MediaWikiServices::getInstance()->getTitleFactory()->newFromPageReference( $page );
-				$image = $this->pageImageCache->pop( $title->getId() );
-
-				if ( $this->flip[ 'page' ] ) {
-					// User requested reverse order; insert at front
-					$this->articleGallery->insert(
-						$image, '', '', $title->getInternalURL(), [], ImageGalleryBase::LOADING_LAZY );
-				} else {
-					$this->articleGallery->add(
-						$image, '', '', $title->getInternalURL(), [], ImageGalleryBase::LOADING_LAZY );
-				}
-
-				break;
-
-			default:
-				parent::addPage( $page, $sortkey, $pageLength, $isRedirect );
+		if ( $this->pictocat->getStyle() !== PictoCatStyle::Bullet ) {
+			parent::addPage( $page, $sortkey, $pageLength, $isRedirect );
+			return;
 		}
+
+		$title = MediaWikiServices::getInstance()->getTitleFactory()->newFromPageReference( $page );
+		$image = $this->repoGroup->findFile( $this->pageImageCache->pop( $title->getId() ) );
+
+		// Render image bullet
+		$thumbnail = $this->codex->thumbnail();
+		if ( $image ) {
+			$thumbUrl = $image->createThumb( self::BULLET_RENDER_SIZE );
+			// createThumb can output a relative URL, which Codex doesn't like.
+			$thumbUrl = $this->urlUtils->expand( $thumbUrl );
+			$thumbnail->setBackgroundImage( $thumbUrl );
+		}
+		// Otherwise, Codex should automatically use a placeholder icon
+
+		$html = $thumbnail->build()->getHtml();
+
+		// Render page name
+		$html .= Html::element(
+			'span',
+			[ 'class' => $isRedirect ? 'member-name redirect-in-category' : 'member-name' ],
+			$title->getFullText()
+		);
+
+		// Make link
+		$html = new HtmlArmor( $html );
+		$link = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink( $page, $html, [
+			'class' => 'pictocat-bullet'
+		] );
+
+		$this->articles[] = $link;
+		$this->articles_start_char[] =
+			$this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
 	}
 
 	/**
@@ -189,11 +164,7 @@ class PictoCategoryViewer extends CategoryViewer {
 				) . "\n";
 			$html .= $countMessage;
 			$html .= $this->getSectionPagingLinks( 'page' );
-			if ( $style === PictoCatStyle::Gallery ) {
-				$html .= $this->articleGallery->toHTML();
-			} else {
-				$html .= $this->formatList( $this->articles, $this->articles_start_char );
-			}
+			$html .= $this->formatList( $this->articles, $this->articles_start_char );
 			$html .= $this->getSectionPagingLinks( 'page' );
 			$html .= "\n" . Html::closeElement( 'div' );
 		}
