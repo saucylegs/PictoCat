@@ -1,0 +1,67 @@
+{
+	"name": "PictoCat",
+	"author": [
+		"Saucy"
+	],
+	"version": "0.0.1",
+	"url": "https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PictoCat",
+	"descriptionmsg": "pictocat-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.45.0",
+		"extensions": {
+			"PageImages": "*"
+		}
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\PictoCat\\": "includes/"
+	},
+	"config": {
+		"PictoCatDefaultStyle": {
+			"description": "Default PictoCat display style. Should be one of \"bullet\", \"gallery\", or \"none\".",
+			"value": "bullet"
+		},
+		"PictoCatActivationPercentage": {
+			"description": "The minimum percentage of pages in a category section that must have a page image for PictoCat to activate.",
+			"value": 50
+		}
+	},
+	"HookHandlers": {
+		"PictoCatHooks": {
+			"class": "MediaWiki\\Extension\\PictoCat\\Hooks"
+		}
+	},
+	"Hooks": {
+		"ArticleFromTitle": "PictoCatHooks",
+		"GetDoubleUnderscoreIDs": "PictoCatHooks"
+	},
+	"MessagesDirs": {
+		"PictoCat": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"PictoCatMagic": "PictoCat.i18n.magic.php"
+	},
+	"ResourceModules": {
+		"ext.pictoCat": {
+			"localBasePath": "resources/ext.pictoCat",
+			"remoteExtPath": "PictoCat/resources/ext.pictoCat",
+			"dependencies": [],
+			"styles": [
+				"ext.pictoCat.styles.less"
+			],
+			"packageFiles": [],
+			"messages": []
+		},
+		"ext.pictoCat.codex": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"codexStyleOnly": "true",
+			"codexComponents": [
+				"CdxThumbnail"
+			]
+		}
+	},
+	"manifest_version": 2
+}
