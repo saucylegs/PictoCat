@@ -83,12 +83,9 @@ class PictoCategoryViewer extends CategoryViewer {
 		$this->codex = new Codex();
 		$this->pageImageCache = new PageImageCache();
         $this->pictocat = new PictoCategory( $context );
-		$moduleStyles = [ 'ext.pictoCat' ];
 		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
-			// Only add Codex style for bullet style categories
-			$moduleStyles[] = 'ext.pictoCat.codex';
+			$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
 		}
-		$this->getOutput()->addModuleStyles( $moduleStyles );
 	}
 
 	/**

@@ -54,7 +54,8 @@ class PictoCategory {
         $this->categoryTitle = $context->getTitle();
 
 		if ( $context->canUseWikiPage() ) {
-			wfDebug( '[PictoCat] Using WikiPage page properties.' );
+			// This seems to be the only way to get page properties at this point.
+			// However, it's not able to get page properties from unpublished edits (i.e., edit previews).
 			$this->pageProperties = $context->getWikiPage()->getParserOutput()->getPageProperties();
 		} else {
 			wfDebug( '[PictoCat] Can\'t get page properties in this context!' );

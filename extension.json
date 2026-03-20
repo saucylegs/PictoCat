@@ -45,17 +45,10 @@
 		"PictoCatMagic": "PictoCat.i18n.magic.php"
 	},
 	"ResourceModules": {
-		"ext.pictoCat": {
+		"ext.pictoCat.bullet": {
 			"localBasePath": "resources/ext.pictoCat",
 			"remoteExtPath": "PictoCat/resources/ext.pictoCat",
-			"dependencies": [],
-			"styles": [
-				"ext.pictoCat.styles.less"
-			],
-			"packageFiles": [],
-			"messages": []
-		},
-		"ext.pictoCat.codex": {
+			"styles": "ext.pictoCat.bullet.styles.less",
 			"class": "MediaWiki\\ResourceLoader\\CodexModule",
 			"codexStyleOnly": "true",
 			"codexComponents": [
