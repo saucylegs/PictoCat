@@ -76,11 +76,11 @@ class PictoCategoryViewer extends CategoryViewer {
 	) {
 		parent::__construct( $page, $context, $from, $until );
 		$this->query = $query;
-		$this->repoGroup = MediaWikiServices::getInstance()->getRepoGroup();
-		$this->languageConverter = MediaWikiServices::getInstance()
-			->getLanguageConverterFactory()->getLanguageConverter();
+		$services = MediaWikiServices::getInstance();
+		$this->repoGroup = $services->getRepoGroup();
+		$this->languageConverter = $services->getLanguageConverterFactory()->getLanguageConverter();
+		$this->urlUtils = $services->getUrlUtils();
 		$this->codex = new Codex();
-		$this->urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
 		$this->pageImageCache = new PageImageCache();
         $this->pictocat = new PictoCategory( $context );
 		$moduleStyles = [ 'ext.pictoCat' ];
@@ -143,11 +143,10 @@ class PictoCategoryViewer extends CategoryViewer {
 	 */
 	protected function getPagesSection(): string {
 		$name = $this->getOutput()->getUnprefixedDisplayTitle();
-		$cat = $this->pictocat->getCategory();
 		$style = $this->pictocat->getStyle();
 		$html = '';
 
-		$databaseCount = $cat->getPageCount( Category::COUNT_CONTENT_PAGES );
+		$databaseCount = $this->pictocat->getPageMemberCount();
 		$localCount = count( $this->articles );
 		// This function should be called even if the result isn't used, it has side effects
 		$countMessage = $this->getCountMessage( $localCount, $databaseCount, 'article' );

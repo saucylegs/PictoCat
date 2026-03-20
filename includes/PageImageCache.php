@@ -43,7 +43,6 @@ class PageImageCache {
 			}
 			$titles[] = $title;
 			// null will be overwritten later if and only if the page has a PageImage
-			// TODO: Test if the null remains
 			$additions[ $title->getId() ] = null;
 		}
 

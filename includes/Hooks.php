@@ -17,6 +17,8 @@ class Hooks implements
 	ArticleFromTitleHook,
 	GetDoubleUnderscoreIDsHook
 {
+	// TODO: Figure out something for edit previews
+
 	/**
 	 * Used to set PictoCategoryPage as the article rendering class for category pages.
 	 * @param Title $title Title used to create the article object

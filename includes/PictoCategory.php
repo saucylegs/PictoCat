@@ -30,6 +30,11 @@ class PictoCategory {
 	 */
 	private array $pageProperties;
 
+	/**
+	 * @var int|null The number of pages (excluding files and subcategories) in the category.
+	 */
+	private ?int $pageCount;
+
 	private IConnectionProvider $dbProvider;
 
 	private TitleFactory $titleFactory;
@@ -49,19 +54,23 @@ class PictoCategory {
         $this->categoryTitle = $context->getTitle();
 
 		if ( $context->canUseWikiPage() ) {
-			$parserOutput = $context->getWikiPage()->getParserOutput();
+			wfDebug( '[PictoCat] Using WikiPage page properties.' );
+			$this->pageProperties = $context->getWikiPage()->getParserOutput()->getPageProperties();
 		} else {
-			wfWarn( '[PictoCat] Uh oh, can\'t use WikiPage in this context!' );
-			$parserOutput = $context->getOutput()->getMetadata();
+			wfDebug( '[PictoCat] Can\'t get page properties in this context!' );
+			$this->pageProperties = [];
 		}
-		$this->pageProperties = $parserOutput->getPageProperties();
-		wfDebug( var_export( $this->pageProperties, true ) );
+		// TODO: Remove these debugging lines
+		$pagePropsContents = var_export( $this->pageProperties, true );
+		wfDebug( "[PictoCat] Page properties: $pagePropsContents" );
+		$contextContents = var_export( $context->getOutput()->getMetadata(), true );
+		wfDebug( "[PictoCat] context->getOutput->getMetadata: $contextContents" );
 
 		// Set dependency injection fields
 		$services = MediaWikiServices::getInstance();
 		$this->dbProvider = $services->getConnectionProvider();
 		$this->titleFactory = $services->getTitleFactory();
-		$mainConfig = $services->getMainConfig();
+		$mainConfig = $context->getConfig();
 
 		// Determine PictoCat style
 		// First, check if the style has been explicitly set
@@ -88,7 +97,7 @@ class PictoCategory {
 		if ( $activationPercentage > 0 ) {
 			$members = $this->getPageMembers();
 
-            // Avoiding dividing by zero for empty categories
+            // Avoid dividing by zero for empty categories
             if ( count( $members ) === 0 ) {
                 $this->style = PictoCatStyle::None;
                 return;
@@ -126,6 +135,17 @@ class PictoCategory {
 	 */
 	public function getCategory(): Category {
 		return Category::newFromTitle( $this->categoryTitle );
+	}
+
+	/**
+	 * @return int The total number of content pages (i.e., excluding files and subcategories)
+	 * in the associated category.
+	 */
+	public function getPageMemberCount(): int {
+		if ( !isset( $this->pageCount ) ) {
+			$this->pageCount = $this->getCategory()->getPageCount( Category::COUNT_CONTENT_PAGES );
+		}
+		return $this->pageCount;
 	}
 
 	/**
@@ -171,8 +191,10 @@ class PictoCategory {
 				'cl_type' => 'page' ] )
 			->orderBy( 'cl_sortkey' );
 
-		return $this->titleFactory->newTitleArrayFromResult(
+		$result = $this->titleFactory->newTitleArrayFromResult(
 			$queryBuilder->caller( __METHOD__ )->fetchResultSet()
 		);
+		$this->pageCount = count( $result );
+		return $result;
 	}
 }
