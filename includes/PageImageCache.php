@@ -8,7 +8,7 @@ use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
- * Caches page IDs and their corresponding PageImage.
+ * Stores page IDs and their corresponding PageImage.
  */
 class PageImageCache {
 	/**

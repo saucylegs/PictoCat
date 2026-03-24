@@ -3,6 +3,18 @@ This is a MediaWiki extension that displays a small image preview for each page 
 
 [write more documentation later]
 
+## Installation
+### Requirements
+This extension has the following hard dependencies:
+- The [PageImages extension](https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PageImages).
+  This extension is included with modern releases of MediaWiki, so you just need to make sure it's enabled and configured.
+- MediaWiki 1.45.
+  - The extension will probably work with MediaWiki 1.44 too, but I haven't tested it.
+    It almost certainly won't work with MediaWiki 1.43 or earlier.
+  - If you're using MediaWiki 1.43 and would like that version to be supported, create a GitHub issue to let me know.
+    I have no interest in supporting any versions earlier than that since they are now considered obsolete.
+  - I haven't looked into pre-release versions yet, but would like to do so soon.
+
 ## Name
 The name "PictoCat" is an abbreviation of "pictographic categories". 
 Any similarity to the name of any formerly popular game console-exclusive messaging app is purely coincidental.

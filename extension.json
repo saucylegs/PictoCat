@@ -19,7 +19,7 @@
 	},
 	"config": {
 		"PictoCatDefaultStyle": {
-			"description": "Default PictoCat display style. Should be one of \"bullet\", \"gallery\", or \"none\".",
+			"description": "Default PictoCat display style. Should be one of \"bullet\" or \"none\".",
 			"value": "bullet"
 		},
 		"PictoCatActivationPercentage": {
@@ -34,6 +34,7 @@
 	},
 	"Hooks": {
 		"ArticleFromTitle": "PictoCatHooks",
+		"OutputPageParserOutput": "PictoCatHooks",
 		"GetDoubleUnderscoreIDs": "PictoCatHooks"
 	},
 	"MessagesDirs": {

@@ -1,4 +1,11 @@
 <?php
+/**
+ * PictoCat modification of the listing and paging of category members.
+ * This file contains code copied from MediaWiki core, which is licensed under GPL-2.0-or-later.
+ *
+ * @license GPL-2.0-or-later
+ * @file
+ */
 
 namespace MediaWiki\Extension\PictoCat;
 
@@ -10,6 +17,7 @@ use MediaWiki\Context\IContextSource;
 use MediaWiki\FileRepo\RepoGroup;
 use MediaWiki\Html\Html;
 use MediaWiki\Language\ILanguageConverter;
+use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
@@ -52,6 +60,9 @@ class PictoCategoryViewer extends CategoryViewer {
 	/** @var array The original query array, to be used in generating paging links. */
 	protected array $query;
 
+	/** @var LinkRenderer */
+	protected LinkRenderer $linkRenderer;
+
 	/**
 	 * @var Codex The Wikimedia Codex instance, used to generate bullet thumbnails.
 	 */
@@ -66,23 +77,25 @@ class PictoCategoryViewer extends CategoryViewer {
 	 * @since 1.19 $context is a second, required parameter
 	 * @param PageIdentity $page
 	 * @param IContextSource $context
+	 * @param ParserOutputInjector $injector To give a ParserOutput to the PictoCategory object.
 	 * @param array $from An array with keys page, subcat,
 	 *        and file for offset of results of each section (since 1.17)
 	 * @param array $until An array with 3 keys for until of each section (since 1.17)
 	 * @param array $query
 	 */
-	public function __construct( PageIdentity $page, IContextSource $context,
+	public function __construct( PageIdentity $page, IContextSource $context, ParserOutputInjector $injector,
 								 array $from = [], array $until = [], array $query = []
 	) {
-		parent::__construct( $page, $context, $from, $until );
+		parent::__construct( $page, $context, $from, $until, $query );
 		$this->query = $query;
 		$services = MediaWikiServices::getInstance();
 		$this->repoGroup = $services->getRepoGroup();
 		$this->languageConverter = $services->getLanguageConverterFactory()->getLanguageConverter();
+		$this->linkRenderer = $services->getLinkRenderer();
 		$this->urlUtils = $services->getUrlUtils();
 		$this->codex = new Codex();
 		$this->pageImageCache = new PageImageCache();
-        $this->pictocat = new PictoCategory( $context );
+        $this->pictocat = new PictoCategory( $context, $injector );
 		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
 			$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
 		}
@@ -126,7 +139,7 @@ class PictoCategoryViewer extends CategoryViewer {
 
 		// Make link
 		$html = new HtmlArmor( $html );
-		$link = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink( $page, $html, [
+		$link = $this->linkRenderer->makeLink( $page, $html, [
 			'class' => 'pictocat-bullet'
 		] );
 
@@ -143,7 +156,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		$style = $this->pictocat->getStyle();
 		$html = '';
 
-		$databaseCount = $this->pictocat->getPageMemberCount();
+		$databaseCount = $this->pictocat->fetchPageMemberCount();
 		$localCount = count( $this->articles );
 		// This function should be called even if the result isn't used, it has side effects
 		$countMessage = $this->getCountMessage( $localCount, $databaseCount, 'article' );
@@ -242,12 +255,11 @@ class PictoCategoryViewer extends CategoryViewer {
 	private function pagingLinks( string $first, string $last, string $type = '' ): string {
 		$prevLink = $this->msg( 'prev-page' )->escaped();
 
-		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		if ( $first != '' ) {
 			$prevQuery = $this->query;
 			$prevQuery["{$type}until"] = $first;
 			unset( $prevQuery["{$type}from"] );
-			$prevLink = $linkRenderer->makeKnownLink(
+			$prevLink = $this->linkRenderer->makeKnownLink(
 				$this->addFragmentToTitle( $this->page, $type ),
 				new HtmlArmor( $prevLink ),
 				[],
@@ -261,7 +273,7 @@ class PictoCategoryViewer extends CategoryViewer {
 			$lastQuery = $this->query;
 			$lastQuery["{$type}from"] = $last;
 			unset( $lastQuery["{$type}until"] );
-			$nextLink = $linkRenderer->makeKnownLink(
+			$nextLink = $this->linkRenderer->makeKnownLink(
 				$this->addFragmentToTitle( $this->page, $type ),
 				new HtmlArmor( $nextLink ),
 				[],
