@@ -23,5 +23,8 @@
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
+	},
+	"require": {
+		"wikimedia/codex": "^0.7.1"
 	}
 }
