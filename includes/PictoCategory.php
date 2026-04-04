@@ -16,6 +16,11 @@ use Wikimedia\Rdbms\IConnectionProvider;
  */
 class PictoCategory {
 	/**
+	 * The IDs used for the double underscore magic words that override a category's display style.
+	 */
+	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle' ];
+
+	/**
 	 * @var Title The title of the category page.
 	 */
 	public readonly Title $categoryTitle;
@@ -38,11 +43,6 @@ class PictoCategory {
 	private IConnectionProvider $dbProvider;
 
 	private TitleFactory $titleFactory;
-
-	/**
-	 * The IDs used for the double underscore magic words that override a category's display style.
-	 */
-	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle' ];
 
 	/**
 	 * Instantiates a PictoCategory object.
@@ -103,6 +103,11 @@ class PictoCategory {
 
 		// Otherwise, check if the automatic activation threshold has been met
 		$activationPercentage = $mainConfig->get( 'PictoCatActivationPercentage' );
+		if ( $activationPercentage > 100 ) {
+			// >100% isn't possible. Treat this as "none by default".
+			$this->style = PictoCatStyle::None;
+			return;
+		}
 		if ( $activationPercentage > 0 ) {
 			// To avoid memory exhaustion, don't check more than $wgCategoryPagingLimit members.
 			$queryLimit = $mainConfig->get( MainConfigNames::CategoryPagingLimit );
@@ -127,7 +132,7 @@ class PictoCategory {
 			}
 		}
 
-		// Finally, check the config for the default style
+		// Finally, if no return yet, check the config for the default style
 		// "Bullet" is the default style if the config value is unrecognized
 		$this->style = PictoCatStyle::tryFrom(
 			strtolower( $mainConfig->get( 'PictoCatDefaultStyle' ) )

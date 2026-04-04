@@ -23,7 +23,7 @@
 			"value": "bullet"
 		},
 		"PictoCatActivationPercentage": {
-			"description": "The minimum percentage of pages in a category section that must have a page image for PictoCat to activate.",
+			"description": "The minimum percentage of pages in a category that must have a page image for PictoCat to activate.",
 			"value": 50
 		}
 	},
