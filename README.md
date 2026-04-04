@@ -25,24 +25,36 @@ in a single category, otherwise there may be unexpected behavior.
 - `__USEBULLETSTYLE__` — Currently, this has the same effect as `__PICTOCAT__`. If additional display styles are added 
   in the future, then categories with this magic word will continue using the current style.
 
+## Stability
+I consider this extension to be in a beta state. This is because of the limited amount of testing I have done
+and the fact that there are features that I may or may not add in the future. However, the extension does not modify
+the database, so there shouldn't be any risk of permanent damage. I would love for someone to try it out and send me
+any feedback!
+
+Also note that this extension makes use of some MediaWiki interfaces that are not very stable.
+When upgrading to a new major version of MediaWiki, be sure to upgrade this extension to a compatible version as well.
+
 ## Installation
 ### Requirements
 This extension has the following dependencies:
 - The [PageImages extension](https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PageImages).
   This extension is included with most modern releases of MediaWiki, so you just need to make sure it's enabled and configured.
 - MediaWiki 1.45.
-  - The extension will probably work with MediaWiki 1.44 too, but I haven't tested it.
-    It almost certainly won't work with MediaWiki 1.43 or earlier.
-  - If you're using MediaWiki 1.43 and would like that version to be supported, create a GitHub issue to let me know.
-    I have no interest in supporting any versions earlier than that since they are now considered obsolete.
+  - It does not work with MediaWiki 1.44 or earlier. If you're using 1.44 or 1.43 and would like that version 
+    to be supported, create a GitHub issue to let me know. I have no interest in supporting any versions earlier 
+    than 1.43 since they are now considered obsolete.
   - I haven't looked into pre-release versions yet, but would like to do so soon.
 
 ### Download
-(I will write this section after publishing to GitHub)
+#### Using Git
+From the `extensions` directory in your MediaWiki installation, run the following command:
+```bash
+git clone https://github.com/saucylegs/PictoCat.git
+```
+This should download the extension into a new PictoCat directory.
 
 ### Activation
-Once the extension has been downloaded to the extensions directory, add the following line to the wiki's
-LocalSettings.php file to enable it:
+Once the extension has been downloaded, add the following line to the wiki's LocalSettings.php file to enable it:
 ```php
 wfLoadExtension( 'PictoCat' );
 ```
