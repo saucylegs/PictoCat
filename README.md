@@ -1,6 +1,8 @@
 # PictoCat
 This is a MediaWiki extension that displays a small image preview next to each page in a category.
 
+[Details are also available on mediawiki.org.](https://www.mediawiki.org/wiki/Extension:PictoCat)
+
 ## Function
 Next to each listing in a category, PictoCat displays a thumbnail containing an image from the corresponding page.
 The thumbnail takes the place of the bullet point. The exact image used is determined by the PageImages extension.
@@ -29,7 +31,7 @@ in a single category, otherwise there may be unexpected behavior.
 I consider this extension to be in a beta state. This is because of the limited amount of testing I have done
 and the fact that there are features that I may or may not add in the future. However, the extension does not modify
 the database, so there shouldn't be any risk of permanent damage. I would love for someone to try it out and send me
-any feedback!
+any feedback! Send any feedback or bugs to the Issues tab on the GitHub repository.
 
 Also note that this extension makes use of some MediaWiki interfaces that are not very stable.
 When upgrading to a new major version of MediaWiki, be sure to upgrade this extension to a compatible version as well.

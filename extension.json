@@ -3,7 +3,7 @@
 	"author": [
 		"Saucy"
 	],
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"url": "https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PictoCat",
 	"descriptionmsg": "pictocat-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -19,7 +19,7 @@
 	},
 	"config": {
 		"PictoCatDefaultStyle": {
-			"description": "Default PictoCat display style. Should be one of \"bullet\" or \"none\".",
+			"description": "Default PictoCat display style. Should be one of \"bullet\" or \"none\". This is mostly for futureproofing; at the moment this setting is pretty much useless.",
 			"value": "bullet"
 		},
 		"PictoCatActivationPercentage": {
