@@ -1,7 +1,7 @@
 # PictoCat
 This is a MediaWiki extension that displays a small image preview next to each page in a category.
 
-[Details are also available on mediawiki.org.](https://www.mediawiki.org/wiki/Extension:PictoCat)
+[Details are also available on mediawiki.org](https://www.mediawiki.org/wiki/Extension:PictoCat).
 
 ## Function
 Next to each listing in a category, PictoCat displays a thumbnail containing an image from the corresponding page.
@@ -48,12 +48,21 @@ This extension has the following dependencies:
   - I haven't looked into pre-release versions yet, but would like to do so soon.
 
 ### Download
+You can download the extension either using Git or from an archive file. Git will make it easier to update the extension
+in the future, but you will need command line access to your wiki's server. If you're not familiar with the command line
+or with Git commands, then I recommend downloading an archive file.
+
 #### Using Git
 From the `extensions` directory in your MediaWiki installation, run the following command:
 ```bash
 git clone https://github.com/saucylegs/PictoCat.git
 ```
 This should download the extension into a new PictoCat directory.
+
+#### From an archive
+From the latest release in the [Releases tab](https://github.com/saucylegs/PictoCat/releases) on GitHub,
+download the .tar.gz file whose name contains the version of your MediaWiki installation. Extract the file
+and copy the directory named `PictoCat` into the `extensions` directory of your MediaWiki installation.
 
 ### Activation
 Once the extension has been downloaded, add the following line to the wiki's LocalSettings.php file to enable it:
