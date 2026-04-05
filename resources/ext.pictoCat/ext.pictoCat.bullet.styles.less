@@ -3,9 +3,12 @@
  * It also relies on Codex thumbnails, which is imported as part of the resource module.
  */
 
-.pictocat-bullet-style ul {
+/* Don't use traditional bullet points (the thumbnails will take their place).
+Extra specificity is to override Minerva's CSS. */
+div.pictocat-bullet-style ul {
 	list-style: none;
 	margin-left: 0;
+	padding-left: 0;
 }
 
 .pictocat-bullet {
