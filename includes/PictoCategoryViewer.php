@@ -10,8 +10,6 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use InvalidArgumentException;
-use MediaWiki\Cache\LinkCache;
-use MediaWiki\Category\Category;
 use MediaWiki\Category\CategoryViewer;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\FileRepo\RepoGroup;
@@ -22,12 +20,10 @@ use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageReference;
-use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleValue;
 use MediaWiki\Utils\UrlUtils;
 use Wikimedia\Codex\Utility\Codex;
 use Wikimedia\HtmlArmor\HtmlArmor;
-use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Responsible for generating the HTML of the listing of pages in a category.
@@ -43,11 +39,6 @@ class PictoCategoryViewer extends CategoryViewer {
 	 * @var PictoCategory The PictoCategory object for this category. Useful for getting the style.
 	 */
 	public PictoCategory $pictocat;
-
-	/**
-	 * @var PageImageCache A cache of the page images for the category members to render.
-	 */
-	protected PageImageCache $pageImageCache;
 
 	/** @var ILanguageConverter */
 	protected ILanguageConverter $languageConverter;
@@ -69,21 +60,25 @@ class PictoCategoryViewer extends CategoryViewer {
 	private Codex $codex;
 
 	/**
+	 * @var CategoryInfoInjector
+	 */
+	private CategoryInfoInjector $injector;
+
+	/**
 	 * @var UrlUtils
 	 */
 	private UrlUtils $urlUtils;
 
 	/**
-	 * @since 1.19 $context is a second, required parameter
 	 * @param PageIdentity $page
 	 * @param IContextSource $context
-	 * @param ParserOutputInjector $injector To give a ParserOutput to the PictoCategory object.
 	 * @param array $from An array with keys page, subcat,
 	 *        and file for offset of results of each section (since 1.17)
 	 * @param array $until An array with 3 keys for until of each section (since 1.17)
 	 * @param array $query
+	 *@since 1.19 $context is a second, required parameter
 	 */
-	public function __construct( PageIdentity $page, IContextSource $context, ParserOutputInjector $injector,
+	public function __construct( PageIdentity $page, IContextSource $context,
 								 array $from = [], array $until = [], array $query = []
 	) {
 		parent::__construct( $page, $context, $from, $until, $query );
@@ -94,11 +89,16 @@ class PictoCategoryViewer extends CategoryViewer {
 		$this->linkRenderer = $services->getLinkRenderer();
 		$this->urlUtils = $services->getUrlUtils();
 		$this->codex = new Codex();
-		$this->pageImageCache = new PageImageCache();
-        $this->pictocat = new PictoCategory( $context, $injector );
+		$this->injector = CategoryInfoInjector::getInstance();
+        $this->pictocat = new PictoCategory( $context );
 		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
 			$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
 		}
+	}
+
+	public function __destruct() {
+		wfDebug( '[PictoCat] PictoCategoryViewer destructor called.' );
+		$this->injector->clear();
 	}
 
 	/**
@@ -116,7 +116,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		}
 
 		$title = MediaWikiServices::getInstance()->getTitleFactory()->newFromPageReference( $page );
-		$image = $this->repoGroup->findFile( $this->pageImageCache->pop( $title->getId() ) );
+		$image = $this->repoGroup->findFile( $this->injector->getPageImageCache()->pop( $title->getId() ) );
 
 		// Render image bullet
 		$thumbnail = $this->codex->thumbnail();
@@ -365,118 +365,5 @@ class PictoCategoryViewer extends CategoryViewer {
 		}
 		// Messages: category-subcat-count, category-article-count, category-file-count
 		return $this->msg( "category-$type-count" )->numParams( $localCount, $totalCount )->parseAsBlock();
-	}
-
-	/**
-	 * Queries the database for the category members to display.
-	 * Should be mostly the same as the parent method, but it also caches the PageImage for the members.
-	 * Doing it this way is probably faster than making a new database query for each member page.
-	 * @return void
-	 */
-	protected function doCategoryQuery(): void {
-		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
-
-		$this->nextPage = [
-			'page' => null,
-			'subcat' => null,
-			'file' => null,
-		];
-		$this->prevPage = [
-			'page' => null,
-			'subcat' => null,
-			'file' => null,
-		];
-
-		$this->flip = [ 'page' => false, 'subcat' => false, 'file' => false ];
-
-		foreach ( [ 'page', 'subcat', 'file' ] as $type ) {
-			# Get the sortkeys for start/end, if applicable.  Note that if
-			# the collation in the database differs from the one
-			# set in $wgCategoryCollation, pagination might go totally haywire.
-			$extraConds = [ 'cl_type' => $type ];
-			if ( isset( $this->from[$type] ) ) {
-				$extraConds[] = $dbr->expr(
-					'cl_sortkey',
-					'>=',
-					$this->collation->getSortKey( $this->from[$type] )
-				);
-			} elseif ( isset( $this->until[$type] ) ) {
-				$extraConds[] = $dbr->expr(
-					'cl_sortkey',
-					'<',
-					$this->collation->getSortKey( $this->until[$type] )
-				);
-				$this->flip[$type] = true;
-			}
-
-			$queryBuilder = $dbr->newSelectQueryBuilder();
-			$queryBuilder->select( array_merge(
-				LinkCache::getSelectFields(),
-				[
-					'cl_sortkey',
-					'cat_id',
-					'cat_title',
-					'cat_subcats',
-					'cat_pages',
-					'cat_files',
-					'cl_sortkey_prefix',
-					'collation_name',
-				]
-			) )
-				->from( 'page' )
-				->andWhere( $extraConds );
-
-			if ( $this->flip[$type] ) {
-				$queryBuilder->orderBy( 'cl_sortkey', SelectQueryBuilder::SORT_DESC );
-			} else {
-				$queryBuilder->orderBy( 'cl_sortkey' );
-			}
-
-			$queryBuilder
-				->join( 'categorylinks', null, [ 'cl_from = page_id' ] )
-				->join( 'linktarget', null, 'cl_target_id = lt_id' )
-				->straightJoin( 'collation', null, 'cl_collation_id = collation_id' )
-				->where( [ 'lt_title' => $this->page->getDBkey(), 'lt_namespace' => NS_CATEGORY ] )
-				->leftJoin( 'category', null, [
-					'cat_title = page_title',
-					'page_namespace' => NS_CATEGORY
-				] )
-				->useIndex( [ 'categorylinks' => 'cl_sortkey_id' ] )
-				->limit( $this->limit + 1 );
-
-			$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
-
-			// Cache the page images
-			$this->pageImageCache->addFromDbQuery( $res );
-
-			$this->getHookRunner()->onCategoryViewer__doCategoryQuery( $type, $res );
-			$linkCache = MediaWikiServices::getInstance()->getLinkCache();
-
-			$count = 0;
-			foreach ( $res as $row ) {
-				$title = Title::newFromRow( $row );
-				$linkCache->addGoodLinkObjFromRow( $title, $row );
-				$humanSortkey = $title->getCategorySortkey( $row->cl_sortkey_prefix );
-
-				if ( ++$count > $this->limit ) {
-					# We've reached the one extra which shows that there
-					# are additional pages to be had. Stop here...
-					$this->nextPage[$type] = $humanSortkey;
-					break;
-				}
-				if ( $count == $this->limit ) {
-					$this->prevPage[$type] = $humanSortkey;
-				}
-
-				if ( $title->getNamespace() === NS_CATEGORY ) {
-					$cat = Category::newFromRow( $row, $title );
-					$this->addSubcategoryObject( $cat, $humanSortkey, $row->page_len );
-				} elseif ( $title->getNamespace() === NS_FILE ) {
-					$this->addImage( $title, $humanSortkey, $row->page_len, $row->page_is_redirect );
-				} else {
-					$this->addPage( $title, $humanSortkey, $row->page_len, $row->page_is_redirect );
-				}
-			}
-		}
 	}
 }

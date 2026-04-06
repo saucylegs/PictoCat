@@ -49,9 +49,8 @@ class PictoCategory {
 	 * The PictoCat style will be determined based on the category page's properties and the wiki's configuration.
 	 * This should be called once the parser has parsed the category page.
      * @param IContextSource $context The request context.
-	 * @param ParserOutputInjector $injector
 	 */
-	public function __construct( IContextSource $context, ParserOutputInjector $injector ) {
+	public function __construct( IContextSource $context ) {
 		$this->categoryTitle = $context->getTitle();
 		wfDebug( "[PictoCat] Entering PictoCategory constructor for {$this->categoryTitle->getFullText()}" );
 		$this->category = Category::newFromTitle( $this->categoryTitle );
@@ -63,7 +62,7 @@ class PictoCategory {
 		$mainConfig = $context->getConfig();
 
 		// Get category page properties
-		$parserOutput = $injector->getIfRelevant( $context );
+		$parserOutput = CategoryInfoInjector::getInstance()->getParserOutputIfRelevant( $context );
 		if ( $parserOutput ) {
 			wfDebug( '[PictoCat] Using injected ParserOutput' );
 			$this->pageProperties = $parserOutput->getPageProperties();
@@ -77,9 +76,6 @@ class PictoCategory {
 			wfDebug( '[PictoCat] Can\'t get page properties in this context!' );
 			$this->pageProperties = [];
 		}
-
-		// Clear injector to avoid erroneous future use
-		$injector->clear();
 
 		// Determine PictoCat style
 		// First, check if the style has been explicitly set
