@@ -15,14 +15,17 @@ use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\Article;
 use MediaWiki\Page\Hook\ArticleFromTitleHook;
 use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Wikimedia\Rdbms\IResultWrapper;
 
 class Hooks implements
 	ArticleFromTitleHook,
 	OutputPageParserOutputHook,
 	CategoryViewer__doCategoryQueryHook,
-	GetDoubleUnderscoreIDsHook
+	GetDoubleUnderscoreIDsHook,
+	GetPreferencesHook
 {
 	/**
 	 * Used to set PictoCategoryPage as the article rendering class for category pages.
@@ -67,5 +70,20 @@ class Hooks implements
 	public function onGetDoubleUnderscoreIDs( &$doubleUnderscoreIDs ): void {
 		// Add PictoCat magic words
 		$doubleUnderscoreIDs = array_merge( $doubleUnderscoreIDs, PictoCategory::MAGIC_WORD_IDS );
+	}
+
+	/**
+	 * Used to add new user preferences.
+	 * @param User $user User whose preferences are being modified
+	 * @param array &$preferences Preferences description array, to be fed to an HTMLForm object
+	 * @return void
+	 */
+	public function onGetPreferences( $user, &$preferences ): void {
+		$preferences['pictocat'] = [
+			'type' => 'select',
+			'section' => 'rendering/pictocat',
+			'label-message' => 'pictocat-preference-use-label',
+			'options-messages' => array_flip( PictoCategory::USAGE_PREFERENCE_OPTIONS ),
+		];
 	}
 }

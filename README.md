@@ -27,11 +27,22 @@ in a single category, otherwise there may be unexpected behavior.
 - `__USEBULLETSTYLE__` — Currently, this has the same effect as `__PICTOCAT__`. If additional display styles are added 
   in the future, then categories with this magic word will continue using the current style.
 
+### User preferences
+Logged-in users can choose to enable or disable PictoCat for all categories (only for their account, of course).
+To do this, go to the Preferences page (Special:Preferences), and under the Appearance tab, scroll down to the
+"Category pages" section and change the "Show image previews in category pages" setting. Setting it to "Always"
+or "Never" will override any magic words or configuration settings.
+
+### URL parameters
+It is possible to specify PictoCat's behavior using a `pictocat` field in a URL query string, e.g., 
+`/wiki/Category:Example?pictocat=true`. This will override any magic words, user preferences, and default behavior.
+
 ## Stability
 I consider this extension to be in a beta state. This is because of the limited amount of testing I have done
-and the fact that there are features that I may or may not add in the future. However, the extension does not modify
-the database, so there shouldn't be any risk of permanent damage. I would love for someone to try it out and send me
-any feedback! Send any feedback or bugs to the Issues tab on the GitHub repository.
+and the fact that there are features that I may or may not add in the future. The code is also likely to be
+significantly refactored in the future. However, there shouldn't be any risk of permanent damage from using this
+extension. I would love for someone to try it out and send me any feedback!
+Send any feedback or bugs to the Issues tab on the GitHub repository.
 
 Also note that this extension makes use of some MediaWiki interfaces that are not very stable.
 When upgrading to a new major version of MediaWiki, be sure to upgrade this extension to a compatible version as well.

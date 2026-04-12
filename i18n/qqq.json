@@ -4,5 +4,10 @@
 			"Saucy"
 		]
 	},
-	"boilerplate-desc": "Provides the description of the extension for Special:Version."
+	"pictocat-desc": "Provides the description of the extension for Special:Version.",
+	"prefs-pictocat": "Heading for PictoCat's section in user preferences.",
+	"pictocat-preference-use-label": "Label for the user preference of whether to show image previews in categories.",
+	"pictocat-preference-use-default": "User preference option to follow the default behavior of each category.",
+	"pictocat-preference-use-always": "User preference option; translation of 'Always'.",
+	"pictocat-preference-use-never": "User preference option; translation of 'Never'."
 }

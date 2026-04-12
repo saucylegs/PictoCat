@@ -3,7 +3,7 @@
 	"author": [
 		"Saucy"
 	],
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"url": "https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PictoCat",
 	"descriptionmsg": "pictocat-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -36,7 +36,8 @@
 		"ArticleFromTitle": "PictoCatHooks",
 		"OutputPageParserOutput": "PictoCatHooks",
 		"CategoryViewer::doCategoryQuery": "PictoCatHooks",
-		"GetDoubleUnderscoreIDs": "PictoCatHooks"
+		"GetDoubleUnderscoreIDs": "PictoCatHooks",
+		"GetPreferences": "PictoCatHooks"
 	},
 	"MessagesDirs": {
 		"PictoCat": [
@@ -45,6 +46,9 @@
 	},
 	"ExtensionMessagesFiles": {
 		"PictoCatMagic": "PictoCat.i18n.magic.php"
+	},
+	"DefaultUserOptions": {
+		"pictocat": "default"
 	},
 	"ResourceModules": {
 		"ext.pictoCat.bullet": {

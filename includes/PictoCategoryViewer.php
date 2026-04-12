@@ -90,7 +90,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		$this->urlUtils = $services->getUrlUtils();
 		$this->codex = new Codex();
 		$this->injector = CategoryInfoInjector::getInstance();
-        $this->pictocat = new PictoCategory( $context );
+		$this->pictocat = new PictoCategory( $context );
 		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
 			$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
 		}

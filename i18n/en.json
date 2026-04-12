@@ -4,5 +4,10 @@
 			"Saucy"
 		]
 	},
-	"pictocat-desc": "Adds image previews to categories"
+	"pictocat-desc": "Adds image previews to categories",
+	"prefs-pictocat": "Category pages",
+	"pictocat-preference-use-label": "Show image previews in category pages",
+	"pictocat-preference-use-default": "Follow category default",
+	"pictocat-preference-use-always": "Always",
+	"pictocat-preference-use-never": "Never"
 }
