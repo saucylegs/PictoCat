@@ -234,7 +234,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		} elseif ( $this->nextPage[$type] !== null || isset( $this->from[$type] ) ) {
 			return $this->pagingLinks(
 				$this->from[$type] ?? '',
-				$this->nextPage[$type],
+				$this->nextPage[$type] ?? '',
 				$type
 			);
 		}
