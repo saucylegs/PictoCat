@@ -20,9 +20,9 @@ use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Title\TitleFactory;
 use MediaWiki\Title\TitleValue;
 use MediaWiki\Utils\UrlUtils;
-use Wikimedia\Codex\Utility\Codex;
 use Wikimedia\HtmlArmor\HtmlArmor;
 
 /**
@@ -55,11 +55,6 @@ class PictoCategoryViewer extends CategoryViewer {
 	protected LinkRenderer $linkRenderer;
 
 	/**
-	 * @var Codex The Wikimedia Codex instance, used to generate bullet thumbnails.
-	 */
-	private Codex $codex;
-
-	/**
 	 * @var CategoryInfoInjector
 	 */
 	private CategoryInfoInjector $injector;
@@ -68,6 +63,11 @@ class PictoCategoryViewer extends CategoryViewer {
 	 * @var UrlUtils
 	 */
 	private UrlUtils $urlUtils;
+
+	/**
+	 * @var TitleFactory
+	 */
+	private TitleFactory $titleFactory;
 
 	/**
 	 * @param PageIdentity $page
@@ -88,7 +88,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		$this->languageConverter = $services->getLanguageConverterFactory()->getLanguageConverter();
 		$this->linkRenderer = $services->getLinkRenderer();
 		$this->urlUtils = $services->getUrlUtils();
-		$this->codex = new Codex();
+		$this->titleFactory = $services->getTitleFactory();
 		$this->injector = CategoryInfoInjector::getInstance();
 		$this->pictocat = new PictoCategory( $context );
 		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
@@ -115,20 +115,19 @@ class PictoCategoryViewer extends CategoryViewer {
 			return;
 		}
 
-		$title = MediaWikiServices::getInstance()->getTitleFactory()->newFromPageReference( $page );
+		$title = $this->titleFactory->newFromPageReference( $page );
 		$image = $this->repoGroup->findFile( $this->injector->getPageImageCache()->pop( $title->getId() ) );
 
 		// Render image bullet
-		$thumbnail = $this->codex->thumbnail();
+		$thumbUrl = null;
 		if ( $image ) {
 			$thumbUrl = $image->createThumb( self::BULLET_RENDER_SIZE );
 			// createThumb can output a relative URL, which Codex doesn't like.
 			$thumbUrl = $this->urlUtils->expand( $thumbUrl );
-			$thumbnail->setBackgroundImage( $thumbUrl );
 		}
 		// Otherwise, Codex should automatically use a placeholder icon
 
-		$html = $thumbnail->build()->getHtml();
+		$html = CodexLite::makeThumbnail( $thumbUrl );
 
 		// Render page name
 		$html .= Html::element(
@@ -302,7 +301,7 @@ class PictoCategoryViewer extends CategoryViewer {
 			$list = self::shortList( $articles, $articles_start_char );
 		}
 
-		$pageLang = MediaWikiServices::getInstance()->getTitleFactory()
+		$pageLang = $this->titleFactory
 			->newFromPageIdentity( $this->page )
 			->getPageLanguage();
 		$attribs = [ 'lang' => $pageLang->getHtmlCode(), 'dir' => $pageLang->getDir(),
