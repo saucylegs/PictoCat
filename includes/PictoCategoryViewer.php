@@ -41,7 +41,7 @@ class PictoCategoryViewer extends CategoryViewer {
 	public PictoCategory $pictocat;
 
 	/** @var ILanguageConverter */
-	protected ILanguageConverter $languageConverter;
+	protected readonly ILanguageConverter $languageConverter;
 
 	/**
 	 * @var RepoGroup The file repositories used in this wiki.
@@ -159,7 +159,7 @@ class PictoCategoryViewer extends CategoryViewer {
 		$databaseCount = $this->pictocat->fetchPageMemberCount();
 		$localCount = count( $this->articles );
 		// This function should be called even if the result isn't used, it has side effects
-		$countMessage = $this->getCountMessage( $localCount, $databaseCount, 'article' );
+		$countMessage = $this->getCountMessage( $localCount, $databaseCount, 'page' );
 
 		if ( $localCount > 0 ) {
 			$html .= Html::openElement( 'div', [
@@ -194,12 +194,9 @@ class PictoCategoryViewer extends CategoryViewer {
 			'page' => 'mw-pages',
 			'subcat' => 'mw-subcategories',
 			'file' => 'mw-category-media',
-			default => throw new InvalidArgumentException( __METHOD__ .
-				" Invalid section $section." ),
+			default => throw new InvalidArgumentException( __METHOD__ . " Invalid section $section." )
 		};
-
-		return new TitleValue( $page->getNamespace(),
-			$page->getDBkey(), $fragment );
+		return new TitleValue( $page->getNamespace(), $page->getDBkey(), $fragment );
 	}
 
 	/**
@@ -219,6 +216,7 @@ class PictoCategoryViewer extends CategoryViewer {
 			if ( $this->nextPage[$type] !== null ) {
 				return $this->pagingLinks(
 					$this->prevPage[$type] ?? '',
+					// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 					$this->until[$type],
 					$type
 				);
@@ -228,6 +226,7 @@ class PictoCategoryViewer extends CategoryViewer {
 			// and therefore the previous link should be disabled.
 			return $this->pagingLinks(
 				'',
+				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 				$this->until[$type],
 				$type
 			);
@@ -320,14 +319,14 @@ class PictoCategoryViewer extends CategoryViewer {
 	 *
 	 * @param int $localCount The number of items returned by our database query.
 	 * @param int $databaseCount The number of items according to the category table.
-	 * @param string $type 'subcat', 'article', or 'file'
+	 * @param string $type 'page', 'subcat', or 'file'
 	 * @return string A message giving the number of items, to output to HTML.
 	 */
 	protected function getCountMessage( int $localCount, int $databaseCount, string $type ): string {
 		// There are three cases:
 		//   1) The category table figure seems good.  It might be wrong, but
-		//      we can't do anything about it if we don't recalculate it on every
-		//      category view.
+		//      we can't do anything about it if we don't recalculate it on ev-
+		//      ery category view.
 		//   2) The category table figure isn't good, like it's smaller than the
 		//      number of actual results, *but* the number of results is less
 		//      than $this->limit and there's no offset.  In this case we still
@@ -338,14 +337,10 @@ class PictoCategoryViewer extends CategoryViewer {
 
 		// This is a little ugly, but we seem to use different names
 		// for the paging types then for the messages.
-		if ( $type === 'article' ) {
-			$pagingType = 'page';
-		} else {
-			$pagingType = $type;
-		}
+		$msgType = $type === 'page' ? 'article' : $type;
 
 		$fromOrUntil = false;
-		if ( isset( $this->from[$pagingType] ) || isset( $this->until[$pagingType] ) ) {
+		if ( isset( $this->from[$type] ) || isset( $this->until[$type] ) ) {
 			$fromOrUntil = true;
 		}
 
@@ -361,9 +356,9 @@ class PictoCategoryViewer extends CategoryViewer {
 			// Case 3: hopeless.  Don't give a total count at all.
 			// Messages: category-subcat-count-limited, category-article-count-limited,
 			// category-file-count-limited
-			return $this->msg( "category-$type-count-limited" )->numParams( $localCount )->parseAsBlock();
+			return $this->msg( "category-$msgType-count-limited" )->numParams( $localCount )->parseAsBlock();
 		}
 		// Messages: category-subcat-count, category-article-count, category-file-count
-		return $this->msg( "category-$type-count" )->numParams( $localCount, $totalCount )->parseAsBlock();
+		return $this->msg( "category-$msgType-count" )->numParams( $localCount, $totalCount )->parseAsBlock();
 	}
 }
