@@ -9,5 +9,7 @@
 	"pictocat-preference-use-label": "Show image previews in category pages",
 	"pictocat-preference-use-default": "Follow category default",
 	"pictocat-preference-use-always": "Always",
-	"pictocat-preference-use-never": "Never"
+	"pictocat-preference-use-never": "Never",
+	"visualeditor-dialog-meta-settings-use-pictocat-label": "Force image previews for category members to be shown",
+	"visualeditor-dialog-meta-settings-no-pictocat-label": "Prevent image previews for category members from being shown"
 }

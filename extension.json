@@ -3,7 +3,7 @@
 	"author": [
 		"Saucy"
 	],
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"url": "https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PictoCat",
 	"descriptionmsg": "pictocat-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -52,13 +52,35 @@
 	},
 	"ResourceModules": {
 		"ext.pictoCat.bullet": {
-			"localBasePath": "resources/ext.pictoCat",
-			"remoteExtPath": "PictoCat/resources/ext.pictoCat",
-			"styles": "ext.pictoCat.bullet.styles.less",
+			"styles": "ext.pictoCat/ext.pictoCat.bullet.styles.less",
 			"class": "MediaWiki\\ResourceLoader\\CodexModule",
 			"codexStyleOnly": "true",
 			"codexComponents": [
 				"CdxThumbnail"
+			]
+		},
+		"ext.pictoCat.visualEditor": {
+			"scripts": [
+				"visualEditorIntegration.js"
+			],
+			"messages": [
+				"visualeditor-dialog-meta-settings-use-pictocat-label",
+				"visualeditor-dialog-meta-settings-no-pictocat-label"
+			],
+			"dependencies": [
+				"ext.visualEditor.mwmeta",
+				"ext.visualEditor.mediawiki"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "PictoCat/resources"
+	},
+	"attributes": {
+		"VisualEditor": {
+			"PluginModules": [
+				"ext.pictoCat.visualEditor"
 			]
 		}
 	},
