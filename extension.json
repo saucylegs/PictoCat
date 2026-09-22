@@ -3,8 +3,8 @@
 	"author": [
 		"Saucy"
 	],
-	"version": "0.3.1",
-	"url": "https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PictoCat",
+	"version": "0.4.0",
+	"url": "https://www.mediawiki.org/wiki/Extension:PictoCat",
 	"descriptionmsg": "pictocat-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
@@ -19,7 +19,7 @@
 	},
 	"config": {
 		"PictoCatDefaultStyle": {
-			"description": "Default PictoCat display style. Should be one of \"bullet\" or \"none\". This is mostly for futureproofing; at the moment this setting is pretty much useless.",
+			"description": "Default PictoCat display style. Should be one of \"bullet\" or \"gallery\".",
 			"value": "bullet"
 		},
 		"PictoCatActivationPercentage": {
@@ -37,7 +37,8 @@
 		"OutputPageParserOutput": "PictoCatHooks",
 		"CategoryViewer::doCategoryQuery": "PictoCatHooks",
 		"GetDoubleUnderscoreIDs": "PictoCatHooks",
-		"GetPreferences": "PictoCatHooks"
+		"GetPreferences": "PictoCatHooks",
+		"GalleryGetModes": "PictoCatHooks"
 	},
 	"MessagesDirs": {
 		"PictoCat": [
@@ -65,7 +66,9 @@
 			],
 			"messages": [
 				"visualeditor-dialog-meta-settings-use-pictocat-label",
-				"visualeditor-dialog-meta-settings-no-pictocat-label"
+				"visualeditor-dialog-meta-settings-no-pictocat-label",
+				"visualeditor-dialog-meta-settings-use-bullet-style-label",
+				"visualeditor-dialog-meta-settings-use-gallery-style-label"
 			],
 			"dependencies": [
 				"ext.visualEditor.mwmeta",

@@ -8,6 +8,7 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Context\IContextSource;
+use MediaWiki\Gallery\Hook\GalleryGetModesHook;
 use MediaWiki\Hook\CategoryViewer__doCategoryQueryHook;
 use MediaWiki\Hook\GetDoubleUnderscoreIDsHook;
 use MediaWiki\Output\Hook\OutputPageParserOutputHook;
@@ -25,7 +26,8 @@ class Hooks implements
 	OutputPageParserOutputHook,
 	CategoryViewer__doCategoryQueryHook,
 	GetDoubleUnderscoreIDsHook,
-	GetPreferencesHook
+	GetPreferencesHook,
+	GalleryGetModesHook
 {
 	/**
 	 * Used to set PictoCategoryPage as the article rendering class for category pages.
@@ -66,9 +68,11 @@ class Hooks implements
 		}
 	}
 
-	/** @inheritDoc */
+	/**
+	 * Used to add PictoCat's double underscore magic words.
+	 * @inheritDoc
+	 */
 	public function onGetDoubleUnderscoreIDs( &$doubleUnderscoreIDs ): void {
-		// Add PictoCat magic words
 		$doubleUnderscoreIDs = array_merge( $doubleUnderscoreIDs, PictoCategory::MAGIC_WORD_IDS );
 	}
 
@@ -85,5 +89,13 @@ class Hooks implements
 			'label-message' => 'pictocat-preference-use-label',
 			'options-messages' => array_flip( PictoCategory::USAGE_PREFERENCE_OPTIONS ),
 		];
+	}
+
+	/**
+	 * Used to add PictoCatImageGallery to the list of available gallery modes.
+	 * @inheritDoc
+	 */
+	public function onGalleryGetModes( &$modeArray ): void {
+		$modeArray['pictocat'] = PictoCatImageGallery::class;
 	}
 }

@@ -10,6 +10,10 @@
 	"pictocat-preference-use-default": "Follow category default",
 	"pictocat-preference-use-always": "Always",
 	"pictocat-preference-use-never": "Never",
+	"pictocat-preference-use-bullet": "Always use \"bullet\" style",
+	"pictocat-preference-use-gallery": "Always use \"gallery\" style",
 	"visualeditor-dialog-meta-settings-use-pictocat-label": "Force image previews for category members to be shown",
-	"visualeditor-dialog-meta-settings-no-pictocat-label": "Prevent image previews for category members from being shown"
+	"visualeditor-dialog-meta-settings-no-pictocat-label": "Prevent image previews for category members from being shown",
+	"visualeditor-dialog-meta-settings-use-bullet-style-label": "Use \"bullet\" style for category member image previews",
+	"visualeditor-dialog-meta-settings-use-gallery-style-label": "Use \"gallery\" style for category member image previews"
 }

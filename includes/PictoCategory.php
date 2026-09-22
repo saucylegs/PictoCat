@@ -19,7 +19,7 @@ class PictoCategory {
 	/**
 	 * The IDs used for the double underscore magic words that override a category's display style.
 	 */
-	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle' ];
+	public const MAGIC_WORD_IDS = [ 'nopictocat', 'pictocat', 'usebulletstyle', 'usegallerystyle' ];
 
 	/**
 	 * The options for the user preference that overrides when PictoCat should be used.
@@ -27,8 +27,10 @@ class PictoCategory {
 	 */
 	public const USAGE_PREFERENCE_OPTIONS = [
 		'default' => 'pictocat-preference-use-default',
+		'never' => 'pictocat-preference-use-never',
 		'always' => 'pictocat-preference-use-always',
-		'never' => 'pictocat-preference-use-never'
+		'bullet' => 'pictocat-preference-use-bullet',
+		'gallery' => 'pictocat-preference-use-gallery',
 	];
 
 	/**
@@ -100,6 +102,9 @@ class PictoCategory {
 			case 'bullet':
 				$this->style = PictoCatStyle::Bullet;
 				return;
+			case 'gallery':
+				$this->style = PictoCatStyle::Gallery;
+				return;
 			case 'true':
 			case 'yes':
 				$this->style = self::getWikiDefaultStyle( $mainConfig );
@@ -117,6 +122,12 @@ class PictoCategory {
 			case 'never':
 				$this->style = PictoCatStyle::None;
 				return;
+			case 'bullet':
+				$this->style = PictoCatStyle::Bullet;
+				return;
+			case 'gallery':
+				$this->style = PictoCatStyle::Gallery;
+				return;
 			default:
 				break;
 		}
@@ -126,6 +137,9 @@ class PictoCategory {
 		switch ( array_key_first( $pageProps ) ) {
 			case 'usebulletstyle':
 				$this->style = PictoCatStyle::Bullet;
+				return;
+			case 'usegallerystyle':
+				$this->style = PictoCatStyle::Gallery;
 				return;
 			case 'nopictocat':
 				$this->style = PictoCatStyle::None;

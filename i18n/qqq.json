@@ -10,6 +10,10 @@
 	"pictocat-preference-use-default": "User preference option to follow the default behavior of each category.",
 	"pictocat-preference-use-always": "User preference option; translation of 'Always'.",
 	"pictocat-preference-use-never": "User preference option; translation of 'Never'.",
+	"pictocat-preference-use-bullet": "User preference option to always use the 'bullet' style.",
+	"pictocat-preference-use-gallery": "User preference option to always use the 'gallery' style.",
 	"visualeditor-dialog-meta-settings-use-pictocat-label": "Label for checkbox to add __PICTOCAT__ magic word.",
-	"visualeditor-dialog-meta-settings-no-pictocat-label": "Label for checkbox to add __NOPICTOCAT__ magic word."
+	"visualeditor-dialog-meta-settings-no-pictocat-label": "Label for checkbox to add __NOPICTOCAT__ magic word.",
+	"visualeditor-dialog-meta-settings-use-bullet-style-label": "Label for checkbox to add __USEBULLETSTYLE__ magic word.",
+	"visualeditor-dialog-meta-settings-use-gallery-style-label": "Label for checkbox to add __USEGALLERYSTYLE__ magic word."
 }

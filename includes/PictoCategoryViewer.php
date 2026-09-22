@@ -13,6 +13,7 @@ use InvalidArgumentException;
 use MediaWiki\Category\CategoryViewer;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\FileRepo\RepoGroup;
+use MediaWiki\Gallery\ImageGalleryBase;
 use MediaWiki\Html\Html;
 use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Linker\LinkRenderer;
@@ -55,6 +56,11 @@ class PictoCategoryViewer extends CategoryViewer {
 	protected LinkRenderer $linkRenderer;
 
 	/**
+	 * @var ImageGalleryBase Gallery object for if the PictoCat style is Gallery.
+	 */
+	protected ImageGalleryBase $pageGallery;
+
+	/**
 	 * @var CategoryInfoInjector
 	 */
 	private CategoryInfoInjector $injector;
@@ -91,8 +97,27 @@ class PictoCategoryViewer extends CategoryViewer {
 		$this->titleFactory = $services->getTitleFactory();
 		$this->injector = CategoryInfoInjector::getInstance();
 		$this->pictocat = new PictoCategory( $context );
-		if ( $this->pictocat->getStyle() === PictoCatStyle::Bullet ) {
-			$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
+
+		switch ( $this->pictocat->getStyle() ) {
+			case PictoCatStyle::Bullet:
+				$this->getOutput()->addModuleStyles( 'ext.pictoCat.bullet' );
+				break;
+			case PictoCatStyle::Gallery:
+				/* // Gallery mode is determined in the same way as CategoryViewer's image section gallery.
+				$mode = $this->getRequest()->getVal( 'gallerymode', false );
+				try {
+					$this->pageGallery = ImageGalleryBase::factory( $mode, $this->getContext() );
+				} catch ( ImageGalleryClassNotFoundException ) {
+					// User specified something invalid, fallback to default.
+					$this->pageGallery = ImageGalleryBase::factory( false, $this->getContext() );
+				} */
+				$this->pageGallery = ImageGalleryBase::factory( 'pictocat', $this->getContext() );
+				$this->pageGallery->setShowFilename( false );
+				$this->pageGallery->setShowDimensions( false );
+				$this->pageGallery->setShowBytes( false );
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -110,41 +135,72 @@ class PictoCategoryViewer extends CategoryViewer {
 		int $pageLength,
 		bool $isRedirect = false
 	): void {
-		if ( $this->pictocat->getStyle() !== PictoCatStyle::Bullet ) {
+		if ( $this->pictocat->getStyle() === PictoCatStyle::None ) {
 			parent::addPage( $page, $sortkey, $pageLength, $isRedirect );
 			return;
 		}
 
-		$title = $this->titleFactory->newFromPageReference( $page );
-		$image = $this->repoGroup->findFile( $this->injector->getPageImageCache()->pop( $title->getId() ) );
+		$pageTitle = $this->titleFactory->newFromPageReference( $page );
+		$imageTitle = $this->injector->getPageImageCache()->pop( $pageTitle->getId() );
 
-		// Render image bullet
-		$thumbUrl = null;
-		if ( $image ) {
-			$thumbUrl = $image->createThumb( self::BULLET_RENDER_SIZE );
-			// createThumb can output a relative URL, which Codex doesn't like.
-			$thumbUrl = $this->urlUtils->expand( $thumbUrl );
+		if ( $this->pictocat->getStyle() === PictoCatStyle::Gallery ) {
+			// Gallery
+
+			// gallery->add needs some sort of Title object
+			$imageTitle ??= $pageTitle;
+
+			$pageName = $pageTitle->getPrefixedText();
+			$link = $this->linkRenderer->makeLink( $pageTitle, $pageName );
+
+			$galleryItemParams = [
+				$imageTitle,
+				$link, // Caption HTML
+				'', // Alt text (not needed; the caption is enough)
+				'', // Link href (not needed; specified in last param)
+				[], // Image handler options
+				ImageGalleryBase::LOADING_LAZY,
+				[ 'link-title' => $pageTitle, 'title' => $pageName ]
+			];
+
+			if ( $this->flip['page'] ) {
+				$this->pageGallery->insert( ...$galleryItemParams );
+			} else {
+				$this->pageGallery->add( ...$galleryItemParams );
+			}
+
+		} else {
+			// Bullet
+
+			$image = $imageTitle ? $this->repoGroup->findFile( $imageTitle ) : false;
+
+			// Render image bullet
+			$thumbUrl = null;
+			if ( $image ) {
+				$thumbUrl = $image->createThumb( self::BULLET_RENDER_SIZE );
+				// createThumb can output a relative URL, which Codex doesn't like.
+				$thumbUrl = $this->urlUtils->expand( $thumbUrl );
+			}
+			// Otherwise, Codex should automatically use a placeholder icon
+
+			$html = CodexLite::makeThumbnail( $thumbUrl );
+
+			// Render page name
+			$html .= Html::element(
+				'span',
+				[ 'class' => $isRedirect ? 'member-name redirect-in-category' : 'member-name' ],
+				$pageTitle->getFullText()
+			);
+
+			// Make link
+			$html = new HtmlArmor( $html );
+			$link = $this->linkRenderer->makeLink( $page, $html, [
+				'class' => 'pictocat-bullet'
+			] );
+
+			$this->articles[] = $link;
+			$this->articles_start_char[] =
+				$this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
 		}
-		// Otherwise, Codex should automatically use a placeholder icon
-
-		$html = CodexLite::makeThumbnail( $thumbUrl );
-
-		// Render page name
-		$html .= Html::element(
-			'span',
-			[ 'class' => $isRedirect ? 'member-name redirect-in-category' : 'member-name' ],
-			$title->getFullText()
-		);
-
-		// Make link
-		$html = new HtmlArmor( $html );
-		$link = $this->linkRenderer->makeLink( $page, $html, [
-			'class' => 'pictocat-bullet'
-		] );
-
-		$this->articles[] = $link;
-		$this->articles_start_char[] =
-			$this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
 	}
 
 	/**
@@ -156,7 +212,9 @@ class PictoCategoryViewer extends CategoryViewer {
 		$html = '';
 
 		$databaseCount = $this->pictocat->fetchPageMemberCount();
-		$localCount = count( $this->articles );
+		$localCount = $this->pictocat->getStyle() === PictoCatStyle::Gallery
+			? $this->pageGallery->count()
+			: count( $this->articles );
 		// This function should be called even if the result isn't used, it has side effects
 		$countMessage = $this->getCountMessage( $localCount, $databaseCount, 'page' );
 
@@ -172,7 +230,11 @@ class PictoCategoryViewer extends CategoryViewer {
 				) . "\n";
 			$html .= $countMessage;
 			$html .= $this->getSectionPagingLinks( 'page' );
-			$html .= $this->formatList( $this->articles, $this->articles_start_char );
+			if ( $this->pictocat->getStyle() === PictoCatStyle::Gallery ) {
+				$html .= $this->pageGallery->toHTML();
+			} else {
+				$html .= $this->formatList( $this->articles, $this->articles_start_char );
+			}
 			$html .= $this->getSectionPagingLinks( 'page' );
 			$html .= "\n" . Html::closeElement( 'div' );
 		}
