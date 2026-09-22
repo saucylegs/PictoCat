@@ -2,9 +2,11 @@
 
 namespace MediaWiki\Extension\PictoCat;
 
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageProps;
 use MediaWiki\Title\Title;
+use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -21,8 +23,14 @@ class PageImageCache {
 	 */
 	private PageProps $pagePropsService;
 
+	/**
+	 * @var LoggerInterface Used to log messages.
+	 */
+	private LoggerInterface $logger;
+
 	public function __construct() {
 		$this->pagePropsService = MediaWikiServices::getInstance()->getPageProps();
+		$this->logger = LoggerFactory::getInstance( 'PictoCat' );
 	}
 
 	/**
@@ -51,7 +59,7 @@ class PageImageCache {
 		foreach ( $pagePropsResult as $pageId => $props ) {
 			$pageImageName = $props[ 'page_image_free' ] ?? $props[ 'page_image' ];
 			$additions[ (int)$pageId ] = Title::makeTitle( NS_FILE, $pageImageName );
-			wfDebug( "[PictoCat][PageImageCache] Page $pageId has page image $pageImageName" );
+			$this->logger->debug( "[PageImageCache] Page $pageId has page image $pageImageName" );
 		}
 
 		$this->cache = $this->cache + $additions;
@@ -95,7 +103,7 @@ class PageImageCache {
 	 * @return Title|null The title of the page's PageImage file, or null if it doesn't have one.
 	 */
 	private function fetch( int $pageId, bool $addToCache = false ): ?Title {
-		wfDebug( "[PictoCat][PageImageCache] Image for page $pageId is not already cached" );
+		$this->logger->debug( "[PageImageCache] Image for page $pageId is not already cached" );
 		$title = Title::newFromId( $pageId );
 		$pageProps = $this->pagePropsService->getProperties( $title, [ 'page_image', 'page_image_free' ] );
 		$pageImageTitle = $pageProps ?

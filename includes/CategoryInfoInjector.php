@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Context\IContextSource;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IResultWrapper;
@@ -94,7 +95,7 @@ class CategoryInfoInjector {
 	 */
 	public function getPageImageCache(): PageImageCache {
 		if ( $this->pageImageCache === null ) {
-			wfWarn( '[PictoCat] Trying to access a null PageImageCache from the injector.' );
+			LoggerFactory::getInstance( 'PictoCat' )->warning( 'Trying to access a null PageImageCache from the injector.' );
 			$this->pageImageCache = new PageImageCache();
 		}
 		return $this->pageImageCache;

@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\PictoCat;
 use MediaWiki\Category\Category;
 use MediaWiki\Config\Config;
 use MediaWiki\Context\IContextSource;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
@@ -64,8 +65,9 @@ class PictoCategory {
 	 * @param IContextSource $context The request context.
 	 */
 	public function __construct( IContextSource $context ) {
+		$logger = LoggerFactory::getInstance( 'PictoCat' );
 		$this->categoryTitle = $context->getTitle();
-		wfDebug( "[PictoCat] Entering PictoCategory constructor for {$this->categoryTitle->getFullText()}" );
+		$logger->debug( "Entering PictoCategory constructor for {$this->categoryTitle->getFullText()}" );
 		$this->category = Category::newFromTitle( $this->categoryTitle );
 
 		// Set dependency injection fields
@@ -77,16 +79,20 @@ class PictoCategory {
 		// Get category page properties
 		$parserOutput = CategoryInfoInjector::getInstance()->getParserOutputIfRelevant( $context );
 		if ( $parserOutput ) {
-			wfDebug( '[PictoCat] Using injected ParserOutput' );
+			$logger->debug( 'Using injected ParserOutput' );
 			$this->pageProperties = $parserOutput->getPageProperties();
 		} elseif ( $context->canUseWikiPage() ) {
 			// The injector does not have a relevant ParserOutput.
 			// Instead, parse the page (or get a cached parse) via the WikiPage object.
 			// This method is adequate for published edits, but not for edit previews.
-			wfDebug( '[PictoCat] Looking up ParserOutput from WikiPage' );
+			$logger->debug( 'Looking up ParserOutput from WikiPage' );
 			$this->pageProperties = $context->getWikiPage()->getParserOutput()->getPageProperties();
 		} else {
-			wfDebug( '[PictoCat] Can\'t get page properties in this context!' );
+			$logger->warning( 'Can\'t get page properties in this context!', [
+				'title' => $this->categoryTitle->getPrefixedText(),
+				'user' => $context->getUser()->getName(),
+				'actionName' => $context->getActionName(),
+			] );
 			$this->pageProperties = [];
 		}
 

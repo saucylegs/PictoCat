@@ -18,6 +18,7 @@ use MediaWiki\Html\Html;
 use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageReference;
@@ -122,7 +123,7 @@ class PictoCategoryViewer extends CategoryViewer {
 	}
 
 	public function __destruct() {
-		wfDebug( '[PictoCat] PictoCategoryViewer destructor called.' );
+		LoggerFactory::getInstance( 'PictoCat' )->debug( 'PictoCategoryViewer destructor called.' );
 		$this->injector->clear();
 	}
 
