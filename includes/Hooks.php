@@ -8,7 +8,7 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Context\IContextSource;
-use MediaWiki\Gallery\Hook\GalleryGetModesHook;
+use MediaWiki\Hook\GalleryGetModesHook; // 1.45 backwards-compatible name; swap out after REL_ branches are made
 use MediaWiki\Hook\CategoryViewer__doCategoryQueryHook;
 use MediaWiki\Hook\GetDoubleUnderscoreIDsHook;
 use MediaWiki\Output\Hook\OutputPageParserOutputHook;
