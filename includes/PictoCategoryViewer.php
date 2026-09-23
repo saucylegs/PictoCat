@@ -13,7 +13,7 @@ use InvalidArgumentException;
 use MediaWiki\Category\CategoryViewer;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\FileRepo\RepoGroup;
-use MediaWiki\Gallery\ImageGalleryBase;
+use ImageGalleryBase; // 1.45 backwards-compatible name; swap out after REL_ branches are made
 use MediaWiki\Html\Html;
 use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Linker\LinkRenderer;

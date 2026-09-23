@@ -9,8 +9,8 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Context\IContextSource;
-use MediaWiki\Gallery\ImageGalleryBase;
-use MediaWiki\Gallery\TraditionalImageGallery;
+use ImageGalleryBase; // 1.45 backwards-compatible name; swap out after REL_ branches are made
+use TraditionalImageGallery; // 1.45 backwards-compatible name; swap out after REL_ branches are made
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
