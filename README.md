@@ -5,37 +5,49 @@ This is a MediaWiki extension that displays a small image preview next to each p
 
 ## Function
 Next to each listing in a category, PictoCat displays a thumbnail containing an image from the corresponding page.
-The thumbnail takes the place of the bullet point. The exact image used is determined by the PageImages extension.
+The exact image used is determined by the PageImages extension.
 
 PictoCat does not affect every category. By default, PictoCat will only activate on a category if at least 50%
 of its members (excluding files and subcategories) have a page image. The wiki's sysadmin can change this threshold
-by setting the relevant [configuration variable](#configuration). You can override the default behavior for a 
-particular category by using a [magic word](#magic-words).
+by setting the relevant [configuration variable](#configuration). You can override the default behavior for a
+particular category by using a [magic word](#magic-words). A user preference exists to allow logged-in users to specify
+the behavior to use for themselves.
 
 PictoCat does not affect the display of subcategories or files in a category.
 For files, this is because MediaWiki already displays a preview of each file.
 For subcategories, this is because most categories do not have page images, and regardless, this extension would
 conflict with the popular CategoryTree extension.
 
+### Display styles
+There are multiple available styles that define how PictoCat images are displayed.
+The style that is used can be configured both globally and on a specific category page.
+- **Bullet style** (default): The images are Codex thumbnails that take the place of the list's bullet points.
+- **Gallery style**: The category members are displayed as a [gallery](https://www.mediawiki.org/wiki/Gallery).
+For each category member, the page image is used as the thumbnail and the page title is used as the caption.
+- **None**: No images are displayed; MediaWiki's default behavior will be used.
+This term is not used in the user interface but exists in the codebase to denote that PictoCat should not be used.
+
 ### Magic words
 A set of [magic words](https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Magic_words) (behavior switches)
 are included to allow you to explicitly set PictoCat's behavior in a particular category.
-You can use them by including one in the wikitext of a category page. No more than one of these should be used
-in a single category, otherwise there may be unexpected behavior.
-- `__PICTOCAT__` — Use PictoCat in this category.
+You can use them by including one in the wikitext of a category page. It is also possible to set them using the
+page settings menu in VisualEditor. No more than one of these should be used in a single category, otherwise there
+may be unexpected behavior.
+- `__PICTOCAT__` — Use PictoCat in this category. The default style will be used.
 - `__NOPICTOCAT__` — Do not use PictoCat in this category.
-- `__USEBULLETSTYLE__` — Currently, this has the same effect as `__PICTOCAT__`. If additional display styles are added 
-  in the future, then categories with this magic word will continue using the current style.
+- `__USEBULLETSTYLE__` — Use the Bullet style in this category.
+- `__USEGALLERYSTYLE__` — Use the Gallery style in this category.
 
 ### User preferences
 Logged-in users can choose to enable or disable PictoCat for all categories (only for their account, of course).
 To do this, go to the Preferences page (Special:Preferences), and under the Appearance tab, scroll down to the
-"Category pages" section and change the "Show image previews in category pages" setting. Setting it to "Always"
-or "Never" will override any magic words or configuration settings.
+"Category pages" section and change the "Show image previews in category pages" setting. Setting it anything other than
+"Use category default" will override any magic words or configuration settings.
 
 ### URL parameters
-It is possible to specify PictoCat's behavior using a `pictocat` field in a URL query string, e.g., 
-`/wiki/Category:Example?pictocat=true`. This will override any magic words, user preferences, and default behavior.
+It is possible to specify PictoCat's behavior using a `pictocat` field in a URL query string, e.g.,
+`/wiki/Category:Example?pictocat=true` or `/wiki/Category:Example?pictocat=gallery`.
+This will override any magic words, user preferences, and default behavior.
 
 ## Stability
 I consider this extension to be in a beta state. This is because of the limited amount of testing I have done
@@ -53,8 +65,8 @@ This extension has the following dependencies:
 - The [PageImages extension](https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PageImages).
   This extension is included with most modern releases of MediaWiki, so you just need to make sure it's enabled and configured.
 - MediaWiki 1.45 or 1.46.
-  - It does not work with MediaWiki 1.44 or earlier. If you're using 1.44 or 1.43 and would like that version 
-    to be supported, create a GitHub issue to let me know. I have no interest in supporting any versions earlier 
+  - It does not work with MediaWiki 1.44 or earlier. If you're using 1.44 or 1.43 and would like that version
+    to be supported, create a GitHub issue to let me know. I have no interest in supporting any versions earlier
     than 1.43 since they are now considered obsolete.
 
 ### Download
@@ -71,7 +83,7 @@ This should download the extension into a new PictoCat directory.
 
 #### From an archive
 From the latest release in the [Releases tab](https://github.com/saucylegs/PictoCat/releases) on GitHub,
-download the .tar.gz file whose name contains the version of your MediaWiki installation. 
+download the .tar.gz file whose name contains the version of your MediaWiki installation.
 (The 1.45 file should still work on 1.46.) Extract the file and copy the directory named `PictoCat` into the
 `extensions` directory of your MediaWiki installation.
 
@@ -94,13 +106,18 @@ This extension includes the following configuration variables that can be set in
   - If set to 101 (or any number greater than 100), then no categories will use PictoCat by default.
     Effectively, each category would have to opt in using the magic words.
   - If a category is large, then it won't check *every* page member; it will only check the first 200 or so.
-    The maximum number of members checked is controlled by 
+    The maximum number of members checked is controlled by
     [$wgCategoryPagingLimit](https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:$wgCategoryPagingLimit).
   - **Default value:** 50
   - **Example usage:** `$wgPictoCatActivationPercentage = 25;`
+- `$wgPictoCatDefaultStyle`
+  - Sets the [display style](#display-styles) to use when PictoCat is activated, but no particular style is specified.
+  Can be either `'bullet'` or `'gallery'`.
+  - **Default value:** `'bullet'`
+  - **Example usage:** `$wgPictoCatDefaultStyle = 'gallery';`
 
 ## Name
-The name "PictoCat" is an abbreviation of "pictographic categories". 
+The name "PictoCat" is an abbreviation of "pictographic categories".
 Any similarity to the name of any game-console-exclusive messaging apps is purely coincidental.
 
 ## AI usage during development
