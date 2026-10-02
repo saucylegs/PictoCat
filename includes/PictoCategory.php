@@ -35,6 +35,11 @@ class PictoCategory {
 	];
 
 	/**
+	 * The value returned by getWikiDefaultStyle() if the default style specified in LocalSettings is invalid.
+	 */
+	public const FALLBACK_DEFAULT_STYLE = PictoCatStyle::Bullet;
+
+	/**
 	 * @var Title The title of the category page.
 	 */
 	public readonly Title $categoryTitle;
@@ -96,8 +101,11 @@ class PictoCategory {
 			$this->pageProperties = [];
 		}
 
+		/** True if the user requests that PictoCat images be used but doesn't specify a style. */
+		$preventNoneStyle = false;
+
 		// Determine PictoCat style
-		// First, check for a request parameter
+		// First, check for a URL parameter
 		$urlParam = $context->getRequest()->getRawVal( 'pictocat' );
 		switch ( $urlParam ) {
 			case 'false':
@@ -113,29 +121,31 @@ class PictoCategory {
 				return;
 			case 'true':
 			case 'yes':
-				$this->style = self::getWikiDefaultStyle( $mainConfig );
-				return;
+				$preventNoneStyle = true;
+				break;
 			default:
 				break;
 		}
 
-		// Check the user preference
-		$preference = $services->getUserOptionsLookup()->getOption( $context->getUser(), 'pictocat' );
-		switch ( $preference ) {
-			case 'always':
-				$this->style = self::getWikiDefaultStyle( $mainConfig );
-				return;
-			case 'never':
-				$this->style = PictoCatStyle::None;
-				return;
-			case 'bullet':
-				$this->style = PictoCatStyle::Bullet;
-				return;
-			case 'gallery':
-				$this->style = PictoCatStyle::Gallery;
-				return;
-			default:
-				break;
+		// Check the user preference if there was no URL parameter
+		if ( !$preventNoneStyle ) {
+			$preference = $services->getUserOptionsLookup()->getOption( $context->getUser(), 'pictocat' );
+			switch ( $preference ) {
+				case 'always':
+					$preventNoneStyle = true;
+					break;
+				case 'never':
+					$this->style = PictoCatStyle::None;
+					return;
+				case 'bullet':
+					$this->style = PictoCatStyle::Bullet;
+					return;
+				case 'gallery':
+					$this->style = PictoCatStyle::Gallery;
+					return;
+				default:
+					break;
+			}
 		}
 
 		// Check if the style has been set by a magic word
@@ -148,14 +158,24 @@ class PictoCategory {
 				$this->style = PictoCatStyle::Gallery;
 				return;
 			case 'nopictocat':
-				$this->style = PictoCatStyle::None;
-				return;
+				if ( !$preventNoneStyle ) {
+					$this->style = PictoCatStyle::None;
+					return;
+				}
+				break;
 			case 'pictocat':
 				// Force default style
 				$this->style = self::getWikiDefaultStyle( $mainConfig );
 				return;
 			default:
 				break;
+		}
+
+		if ( $preventNoneStyle ) {
+			// Make sure the default style is not None either
+			$tentativeStyle = self::getWikiDefaultStyle( $mainConfig );
+			$this->style = $tentativeStyle == PictoCatStyle::None ? self::FALLBACK_DEFAULT_STYLE : $tentativeStyle;
+			return;
 		}
 
 		// Otherwise, check if the automatic activation threshold has been met
@@ -195,14 +215,14 @@ class PictoCategory {
 
 	/**
 	 * Returns a PictoCatStyle based on the value of the wiki's $wgPictoCatDefaultStyle.
-	 * Defaults to Bullet if the value is unrecognized.
+	 * Defaults to FALLBACK_DEFAULT_STYLE if the value is unrecognized.
 	 * @param Config $siteConfig The site configuration, from a ContextSource or MediaWikiServices.
 	 * @return PictoCatStyle The default PictoCat style for the wiki.
 	 */
 	public static function getWikiDefaultStyle( Config $siteConfig ): PictoCatStyle {
 		return PictoCatStyle::tryFrom(
 			strtolower( $siteConfig->get( 'PictoCatDefaultStyle' ) )
-		) ?? PictoCatStyle::Bullet;
+		) ?? self::FALLBACK_DEFAULT_STYLE;
 	}
 
 	/**
