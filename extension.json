@@ -53,7 +53,7 @@
 	},
 	"ResourceModules": {
 		"ext.pictoCat.bullet": {
-			"styles": "ext.pictoCat/ext.pictoCat.bullet.styles.less",
+			"styles": "ext.pictoCat/ext.pictoCat.bullet.styles.css",
 			"class": "MediaWiki\\ResourceLoader\\CodexModule",
 			"codexStyleOnly": "true",
 			"codexComponents": [
