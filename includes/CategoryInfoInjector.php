@@ -50,6 +50,14 @@ class CategoryInfoInjector {
     }
 
 	/**
+	 * Sets the singleton instance of this class to null. Call this when you're all done with it.
+	 * @return void
+	 */
+	public static function destroyInstance(): void {
+		self::$instance = null;
+	}
+
+	/**
 	 * Sets the ParserOutput object to be held onto.
 	 * @param ParserOutput $parserOutput The ParserOutput object to cache.
 	 * @param Title $title The title of the page the ParserOutput came from.
@@ -99,15 +107,5 @@ class CategoryInfoInjector {
 			$this->pageImageCache = new PageImageCache();
 		}
 		return $this->pageImageCache;
-	}
-
-	/**
-	 * Clears all objects from this cache.
-	 * @return void
-	 */
-	public function clear(): void {
-		$this->title = null;
-		$this->parserOutput = null;
-		$this->pageImageCache = null;
 	}
 }

@@ -124,7 +124,7 @@ class PictoCategoryViewer extends CategoryViewer {
 
 	public function __destruct() {
 		LoggerFactory::getInstance( 'PictoCat' )->debug( 'PictoCategoryViewer destructor called.' );
-		$this->injector->clear();
+		CategoryInfoInjector::destroyInstance();
 	}
 
 	/**
