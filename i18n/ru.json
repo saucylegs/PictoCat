@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Daisy40"
+		]
+	},
+	"pictocat-desc": "Добавляет превью изображений в категории",
+	"prefs-pictocat": "Страницы категорий",
+	"pictocat-preference-use-label": "Показывать превью изображений на страницах категорий",
+	"pictocat-preference-use-default": "Как задано для категории",
+	"pictocat-preference-use-always": "Всегда",
+	"pictocat-preference-use-never": "Никогда",
+	"pictocat-preference-use-bullet": "Всегда использовать стиль «маркеры»",
+	"pictocat-preference-use-gallery": "Всегда использовать стиль «галерея»",
+	"visualeditor-dialog-meta-settings-use-pictocat-label": "Принудительно показывать превью изображений для элементов категории",
+	"visualeditor-dialog-meta-settings-no-pictocat-label": "Не показывать превью изображений для элементов категории",
+	"visualeditor-dialog-meta-settings-use-bullet-style-label": "Использовать стиль «маркеры» для превью изображений элементов категории",
+	"visualeditor-dialog-meta-settings-use-gallery-style-label": "Использовать стиль «галерея» для превью изображений элементов категории"
+}
