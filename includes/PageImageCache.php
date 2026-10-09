@@ -4,7 +4,9 @@ namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\PageIdentityValue;
 use MediaWiki\Page\PageProps;
+use MediaWiki\Page\PageStore;
 use MediaWiki\Title\Title;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\IResultWrapper;
@@ -14,7 +16,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  */
 class PageImageCache {
 	/**
-	 * @var Title[] Keys should be a page ID, and values should be a file title or null.
+	 * @var array<int, Title|null> Keys should be a page ID, and values should be a file title or null.
 	 */
 	private array $cache = [];
 
@@ -28,8 +30,15 @@ class PageImageCache {
 	 */
 	private LoggerInterface $logger;
 
+	/**
+	 * @var PageStore Used to fetch a PageIdentity from a page ID.
+	 */
+	private PageStore $pageStore;
+
 	public function __construct() {
-		$this->pagePropsService = MediaWikiServices::getInstance()->getPageProps();
+		$services = MediaWikiServices::getInstance();
+		$this->pagePropsService = $services->getPageProps();
+		$this->pageStore = $services->getPageStore();
 		$this->logger = LoggerFactory::getInstance( 'PictoCat' );
 	}
 
@@ -40,11 +49,17 @@ class PageImageCache {
 	 * @return void
 	 */
 	public function addFromDbQuery( IResultWrapper $rows ): void {
-		// Create a Title object for each page
+		/** @var PageIdentityValue[] $titles PageIdentity for each member page */
 		$titles = [];
+		/** @var array<Title|null> $additions To add to $this->cache */
 		$additions = [];
+
 		foreach ( $rows as $row ) {
-			$title = Title::newFromRow( $row );
+			$title = PageIdentityValue::localIdentity(
+				$row->page_id,
+				$row->page_namespace,
+				$row->page_title
+			);
 			// Skip files and categories
 			if ( $title->getNamespace() === NS_FILE || $title->getNamespace() === NS_CATEGORY ) {
 				continue;
@@ -104,7 +119,7 @@ class PageImageCache {
 	 */
 	private function fetch( int $pageId, bool $addToCache = false ): ?Title {
 		$this->logger->debug( "[PageImageCache] Image for page $pageId is not already cached" );
-		$title = Title::newFromId( $pageId );
+		$title = $this->pageStore->getPageById( $pageId );
 		$pageProps = $this->pagePropsService->getProperties( $title, [ 'page_image', 'page_image_free' ] );
 		$pageImageTitle = $pageProps ?
 			Title::makeTitle( NS_FILE,
