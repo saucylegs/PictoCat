@@ -64,7 +64,7 @@ When upgrading to a new major version of MediaWiki, be sure to upgrade this exte
 This extension has the following dependencies:
 - The [PageImages extension](https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:PageImages).
   This extension is included with most modern releases of MediaWiki, so you just need to make sure it's enabled and configured.
-- MediaWiki 1.45 or 1.46.
+- MediaWiki 1.45 or later.
   - It does not work with MediaWiki 1.44 or earlier. If you're using 1.44 or 1.43 and would like that version
     to be supported, create a GitHub issue to let me know. I have no interest in supporting any versions earlier
     than 1.43 since they are now considered obsolete.
@@ -79,12 +79,17 @@ From the `extensions` directory in your MediaWiki installation, run the followin
 ```bash
 git clone https://github.com/saucylegs/PictoCat.git
 ```
-This should download the extension into a new PictoCat directory.
+This should download the extension into a new PictoCat directory. Then, run the following commands,
+replacing `REL1_xx` with the correct flag for your version of MediaWiki (e.g. `REL1_46` for 1.46):
+```bash
+cd PictoCat
+git checkout REL1_xx
+```
 
 #### From an archive
 From the latest release in the [Releases tab](https://github.com/saucylegs/PictoCat/releases) on GitHub,
 download the .tar.gz file whose name contains the version of your MediaWiki installation.
-(The 1.45 file should still work on 1.46.) Extract the file and copy the directory named `PictoCat` into the
+Extract the file and copy the directory named `PictoCat` into the
 `extensions` directory of your MediaWiki installation.
 
 ### Activation
