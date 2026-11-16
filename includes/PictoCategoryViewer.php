@@ -13,7 +13,7 @@ use InvalidArgumentException;
 use MediaWiki\Category\CategoryViewer;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\FileRepo\RepoGroup;
-use ImageGalleryBase; // 1.45 backwards-compatible name; swap out after REL_ branches are made
+use MediaWiki\Gallery\ImageGalleryBase;
 use MediaWiki\Html\Html;
 use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Linker\LinkRenderer;
@@ -199,21 +199,41 @@ class PictoCategoryViewer extends CategoryViewer {
 			] );
 
 			$this->articles[] = $link;
-			$this->articles_start_char[] =
-				$this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
+			$this->articles_start_char[] = $this->getStartKey( $sortkey );
 		}
+	}
+
+	/**
+	 * Compute the group heading under which an entry should be listed.
+	 * Identical to the parent class's method, but it is private, so we need to re-implement it.
+	 *
+	 * When ordering by cl_timestamp, $sortkey is already a display-ready
+	 * grouping label (e.g. a formatted date) produced in doCategoryQuery(),
+	 * so it's used as-is. Otherwise, fall back to the usual collation-based
+	 * first-letter grouping.
+	 *
+	 * @param string $sortkey
+	 * @return string
+	 */
+	protected function getStartKey( string $sortkey ): string {
+		if ( $this->sortByTimestamp ) {
+			return $sortkey;
+		}
+		return $this->languageConverter->convert( $this->collation->getFirstLetter( $sortkey ) );
 	}
 
 	/**
 	 * @return string The HTML for the pages section
 	 */
 	protected function getPagesSection(): string {
-		$name = $this->getOutput()->getUnprefixedDisplayTitle();
+		[ , , $name ] = array_map(
+			HtmlArmor::getHtml( ... ), $this->getOutput()->getDisplayTitleParts()
+		);
 		$style = $this->pictocat->getStyle();
 		$html = '';
 
 		$databaseCount = $this->pictocat->fetchPageMemberCount();
-		$localCount = $this->pictocat->getStyle() === PictoCatStyle::Gallery
+		$localCount = $style === PictoCatStyle::Gallery
 			? $this->pageGallery->count()
 			: count( $this->articles );
 		// This function should be called even if the result isn't used, it has side effects
@@ -231,7 +251,7 @@ class PictoCategoryViewer extends CategoryViewer {
 				) . "\n";
 			$html .= $countMessage;
 			$html .= $this->getSectionPagingLinks( 'page' );
-			if ( $this->pictocat->getStyle() === PictoCatStyle::Gallery ) {
+			if ( $style === PictoCatStyle::Gallery ) {
 				$html .= $this->pageGallery->toHTML();
 			} else {
 				$html .= $this->formatList( $this->articles, $this->articles_start_char );

@@ -9,8 +9,8 @@
 namespace MediaWiki\Extension\PictoCat;
 
 use MediaWiki\Context\IContextSource;
-use ImageGalleryBase; // 1.45 backwards-compatible name; swap out after REL_ branches are made
-use TraditionalImageGallery; // 1.45 backwards-compatible name; swap out after REL_ branches are made
+use MediaWiki\Gallery\ImageGalleryBase;
+use MediaWiki\Gallery\TraditionalImageGallery;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
@@ -201,8 +201,12 @@ class PictoCatImageGallery extends TraditionalImageGallery {
 				Linker::processResponsiveImages( $img, $thumb, $transformOptions );
 
 				$thumbhtml = $thumb->toHtml( $imageParameters );
-				$thumbhtml = Html::rawElement(
-					'span', [ 'typeof' => $rdfaType ], $thumbhtml
+				$thumbhtml = Html::rawElement( 'span',
+					[
+						'class' => $imageOptions['class'] ?? null,
+						'typeof' => $rdfaType,
+					],
+					$thumbhtml
 				);
 
 				# Set both fixed width and min-height.

@@ -75,7 +75,7 @@ class PictoCategory {
 		$logger->debug( "Entering PictoCategory constructor for {$this->categoryTitle->getFullText()}" );
 		$this->category = Category::newFromTitle( $this->categoryTitle );
 
-		// Set dependency injection fields
+		// Set service fields
 		$services = MediaWikiServices::getInstance();
 		$this->dbProvider = $services->getConnectionProvider();
 		$this->titleFactory = $services->getTitleFactory();
